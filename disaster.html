@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Control the Crisis: Nuclear Power Plant Simulator</title>
+<style>
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* prevents scrolling */
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #18181b 60%, #facc15 100%);
+  color: #f3f4f6;
+}
+
+header {
+  background: #111;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 3px solid #facc15;
+}
+
+header strong {
+  font-size: 1.3rem;
+  letter-spacing: 1px;
+  color: #facc15;
+}
+
+header select {
+  background: #222;
+  color: #facc15;
+  border: 1px solid #facc15;
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.game {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  height: calc(100vh - 60px);
+}
+
+.panel {
+  background: #18181b;
+  padding: 18px 14px;
+  border-right: 2px solid #facc15;
+  min-width: 240px;
+}
+
+.panel h3 {
+  margin-top: 18px;
+  font-size: 1.1rem;
+  color: #facc15;
+}
+
+.stats {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+
+.stat-label {
+  color: #facc15;
+}
+
+.system-bars {
+  margin-bottom: 18px;
+}
+
+.system-bar {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.system-bar span {
+  width: 120px;
+  display: inline-block;
+}
+
+.bar-bg {
+  width: 120px;
+  height: 16px;
+  background: #222;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #444;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.3s;
+}
+
+.bar-temp { background: #dc2626; }
+.bar-rad { background: #facc15; }
+.bar-power { background: #38bdf8; }
+.bar-staff { background: #16a34a; }
+.bar-budget { background: #f59e42; }
+
+button {
+  margin-top: 18px;
+  width: 100%;
+  padding: 10px;
+  background: #dc2626;
+  border: none;
+  color: white;
+  font-weight: bold;
+  font-size: 1.1em;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #b91c1c;
+}
+
+.map-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.map {
+  background: url('D:/Mik stuff/Mik Coding/map.jpg') center center/cover no-repeat;
+  width: 50%;
+  height: 100%;
+  aspect-ratio: 1 / 1;
+  border: 3px solid #facc15;
+  box-shadow: 0 0 40px #000a;
+  display: block;
+  padding: 0;
+  position: relative;
+  margin: 0; /* Remove margin */
+  max-width: none; /* Remove max-width */
+}
+
+.event-marker {
+  position: absolute;
+  font-size: 3.2rem;
+  color: #dc2626;
+  cursor: pointer;
+  animation: pulse 1s infinite;
+  z-index: 10;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.event-popup {
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  transform: translate(-50%, 0);
+  background: #18181b;
+  color: #facc15;
+  border: 2px solid #facc15;
+  border-radius: 12px;
+  padding: 24px 32px;
+  z-index: 20;
+  box-shadow: 0 4px 24px #000a;
+  min-width: 320px;
+  text-align: center;
+  font-size: 1.1em;
+}
+
+.event-popup button {
+  margin-top: 16px;
+  width: auto;
+  padding: 8px 18px;
+  font-size: 1em;
+}
+
+.result {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #18181b;
+  padding: 22px 32px;
+  border-radius: 12px;
+  border: 2px solid #facc15;
+  display: none;
+  text-align: center;
+  color: #facc15;
+  font-size: 1.15em;
+  z-index: 100;
+  box-shadow: 0 4px 24px #000a;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <strong>☢️ Control the Crisis: Nuclear Power Plant Simulator</strong>
+  <select id="difficulty" onchange="setDifficulty()">
+    <option value="easy">Easy</option>
+    <option value="medium" selected>Medium</option>
+    <option value="hard">Hard</option>
+  </select>
+</header>
+
+<div class="game">
+
+  <!-- LEFT PANEL -->
+  <div class="panel">
+    <h3>Mission</h3>
+    <div class="stats">
+      Prevent reactor meltdown and protect the population.<br>
+      <span class="stat-label">⏱️ Time:</span> <span id="time"></span>s
+    </div>
+
+    <h3>System Status</h3>
+    <div class="system-bars">
+      <div class="system-bar">
+        <span>🔥 Temperature</span>
+        <div class="bar-bg"><div class="bar-fill bar-temp" id="barTemp"></div></div>
+      </div>
+      <div class="system-bar">
+        <span>☢️ Radiation</span>
+        <div class="bar-bg"><div class="bar-fill bar-rad" id="barRad"></div></div>
+      </div>
+      <div class="system-bar">
+        <span>⚡ Power</span>
+        <div class="bar-bg"><div class="bar-fill bar-power" id="barPower"></div></div>
+      </div>
+      <div class="system-bar">
+        <span>👥 Staff</span>
+        <div class="bar-bg"><div class="bar-fill bar-staff" id="barStaff"></div></div>
+      </div>
+      <div class="system-bar">
+        <span>💰 Budget</span>
+        <div class="bar-bg"><div class="bar-fill bar-budget" id="barBudget"></div></div>
+      </div>
+    </div>
+
+    <button id="startBtn" onclick="startGame()">START NUCLEAR CRISIS</button>
+  </div>
+
+  <!-- MAP AREA -->
+  <div class="map-area">
+    <div class="map" id="map">
+      <!-- Event markers will be placed here -->
+    </div>
+  </div>
+
+</div>
+
+<div class="result" id="resultBox"></div>
+
+<script>
+const difficulties = {
+  easy:   { time: 300, budget: 80000, temp: 20, rad: 10, power: 80, staff: 90 },
+  medium: { time: 180, budget: 50000, temp: 35, rad: 20, power: 60, staff: 70 },
+  hard:   { time: 120, budget: 25000, temp: 55, rad: 35, power: 40, staff: 50 }
+};
+
+let timeLeft, budget, temp, rad, power, staff;
+let running = false;
+let eventActive = false;
+let eventQueue = [];
+let eventPopup = null;
+let intervalId = null;
+
+const eventLocations = [
+  // Center Main Control Desk
+  { name: "Reactor Core", x: 0.5, y: 0.38, desc: "Reactor temperature rising!", type: "temp", actions: [
+    { label: "Adjust Control Rods", effect: { temp: -20, power: -5, budget: -2000 } },
+    { label: "Activate Cooling Pumps", effect: { temp: -25, power: -10, budget: -3000 } },
+    { label: "Divert Power to Emergency", effect: { power: -15, temp: -10, budget: -4000 } }
+  ]},
+  // Top Industrial Section
+  { name: "Cooling System", x: 0.7, y: 0.12, desc: "Cooling failure!", type: "power", actions: [
+    { label: "Restart Pumps", effect: { power: +15, temp: -10, budget: -2500 } },
+    { label: "Switch to Backup Generator", effect: { power: +10, budget: -3500 } },
+    { label: "Reduce Reactor Output", effect: { temp: -10, power: -10, budget: -1000 } }
+  ]},
+  // Left Storage/Service Area
+  { name: "Maintenance Room", x: 0.13, y: 0.22, desc: "Emergency crew delay!", type: "staff", actions: [
+    { label: "Deploy Maintenance Team", effect: { staff: +20, budget: -2000 } },
+    { label: "Unlock Emergency Valves", effect: { staff: +10, power: +5, budget: -1500 } },
+    { label: "Clear System Blockage", effect: { staff: +15, temp: -5, budget: -1800 } }
+  ]},
+  // Bottom Conference Room
+  { name: "Decision Room", x: 0.5, y: 0.85, desc: "Decision phase!", type: "budget", actions: [
+    { label: "Partial Shutdown", effect: { temp: -10, power: -10, budget: -5000 } },
+    { label: "Full SCRAM", effect: { temp: -30, power: -30, budget: -12000 } },
+    { label: "Evacuate Population", effect: { rad: -10, staff: -10, budget: -8000 } }
+  ]},
+  // Bottom Hallway With Monitors
+  { name: "Containment Hall", x: 0.85, y: 0.92, desc: "Radiation leak detected!", type: "rad", actions: [
+    { label: "Seal Containment Doors", effect: { rad: -20, budget: -3000 } },
+    { label: "Activate Ventilation Filters", effect: { rad: -15, power: -5, budget: -2500 } },
+    { label: "Deploy Hazmat Team", effect: { rad: -25, staff: -10, budget: -4000 } }
+  ]}
+];
+
+function setDifficulty() {
+  const diff = document.getElementById("difficulty").value;
+  const d = difficulties[diff];
+  timeLeft = d.time;
+  budget = d.budget;
+  temp = d.temp;
+  rad = d.rad;
+  power = d.power;
+  staff = d.staff;
+  running = false;
+  eventActive = false;
+  eventQueue = [];
+  clearEvents();
+  updateBars();
+  document.getElementById("time").textContent = timeLeft;
+  document.getElementById("resultBox").style.display = "none";
+  document.getElementById("startBtn").disabled = false;
+}
+
+function updateBars() {
+  document.getElementById("barTemp").style.width = Math.min(temp,100) + "%";
+  document.getElementById("barRad").style.width = Math.min(rad,100) + "%";
+  document.getElementById("barPower").style.width = Math.min(power,100) + "%";
+  document.getElementById("barStaff").style.width = Math.min(staff,100) + "%";
+  document.getElementById("barBudget").style.width = Math.min(budget/80000*100,100) + "%";
+  document.getElementById("time").textContent = timeLeft;
+}
+
+function startGame() {
+  running = true;
+  eventQueue = [];
+  clearEvents();
+  document.getElementById("startBtn").disabled = true;
+  intervalId = setInterval(gameTick, 1000);
+  scheduleEvent();
+}
+
+function gameTick() {
+  if (!running) return;
+  timeLeft--;
+  // Passive system decay
+  temp += 1.5;
+  rad += 0.6;
+  power -= 0.7;
+  staff -= 0.7;
+  budget -= 500;
+
+  updateBars();
+
+  if (timeLeft <= 0) {
+    endGame("Time's up! Reactor meltdown risk.");
+    return;
+  }
+  if (temp >= 100) {
+    endGame("🔥 Reactor meltdown! Catastrophic failure.");
+    return;
+  }
+  if (rad >= 100) {
+    endGame("☢️ Radiation breach! Facility compromised.");
+    return;
+  }
+  if (power <= 0) {
+    endGame("⚡ Total power loss! Unable to control systems.");
+    return;
+  }
+  if (staff <= 0) {
+    endGame("👥 Staff exhausted! No one left to respond.");
+    return;
+  }
+  if (budget <= 0) {
+    endGame("💰 Budget depleted! No resources for emergency.");
+    return;
+  }
+
+  // Random event trigger
+  if (!eventActive && Math.random() < 0.25) {
+    scheduleEvent();
+  }
+}
+
+function scheduleEvent() {
+  if (eventActive) return;
+  // Pick a random event location
+  const idx = Math.floor(Math.random() * eventLocations.length);
+  const event = eventLocations[idx];
+  eventActive = true;
+  showEventMarker(event, idx);
+}
+
+function showEventMarker(event, idx) {
+  const map = document.getElementById("map");
+  const marker = document.createElement("div");
+  marker.className = "event-marker";
+  marker.style.left = (event.x * 100) + "%";
+  marker.style.top = (event.y * 100) + "%";
+  marker.innerHTML = "❗";
+  marker.title = event.desc;
+  marker.onclick = () => {
+    showEventPopup(event, marker);
+  };
+  marker.id = "eventMarker";
+  map.appendChild(marker);
+}
+
+function showEventPopup(event, marker) {
+  if (eventPopup) eventPopup.remove();
+  eventPopup = document.createElement("div");
+  eventPopup.className = "event-popup";
+  eventPopup.innerHTML = `
+    <h3>${event.name}</h3>
+    <p>${event.desc}</p>
+    ${event.actions.map((a,i) => `<button onclick="window.handleEventAction(${i})">${a.label}</button>`).join("<br>")}
+  `;
+  document.body.appendChild(eventPopup);
+
+  // Save current event for action
+  window.currentEvent = event;
+  window.currentMarker = marker;
+}
+
+window.handleEventAction = function(i) {
+  const event = window.currentEvent;
+  const action = event.actions[i];
+  // Apply effects
+  if (action.effect.temp) temp += action.effect.temp * 1.15;
+  if (action.effect.rad) rad += action.effect.rad * 1.15;
+  if (action.effect.power) power += action.effect.power * 1.15;
+  if (action.effect.staff) staff += action.effect.staff * 1.15;
+  if (action.effect.budget) budget += action.effect.budget * 1.15;
+  // Clamp values
+  temp = Math.max(0, temp);
+  rad = Math.max(0, rad);
+  power = Math.max(0, power);
+  staff = Math.max(0, staff);
+  budget = Math.max(0, budget);
+  updateBars();
+  // Remove marker and popup
+  if (window.currentMarker) window.currentMarker.remove();
+  if (eventPopup) eventPopup.remove();
+  eventActive = false;
+  // Schedule next event after a short delay
+  setTimeout(scheduleEvent, 2000);
+};
+
+function clearEvents() {
+  const map = document.getElementById("map");
+  Array.from(map.querySelectorAll('.event-marker')).forEach(e => e.remove());
+  if (eventPopup) eventPopup.remove();
+}
+
+function endGame(msg) {
+  running = false;
+  clearInterval(intervalId);
+  clearEvents();
+  document.getElementById("resultBox").style.display = "block";
+  document.getElementById("resultBox").innerHTML = `
+    <h3>Mission Result</h3>
+    <p>${msg}</p>
+    <p>
+      🔥 Temperature: ${temp}<br>
+      ☢️ Radiation: ${rad}<br>
+      ⚡ Power: ${power}<br>
+      👥 Staff: ${staff}<br>
+      💰 Budget: $${budget.toLocaleString()}
+    </p>
+    <button onclick="setDifficulty()">Restart</button>
+  `;
+}
+
+setDifficulty();
+</script>
+</body>
+</html>
