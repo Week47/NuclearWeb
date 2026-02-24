@@ -261,9 +261,9 @@ button:hover {
 
 <script>
 const difficulties = {
-  easy:   { time: 200, budget: 80000, temp: 20, rad: 10, power: 100, staff: 100 },
-  medium: { time: 150, budget: 60000, temp: 35, rad: 20, power: 100, staff: 100 },
-  hard:   { time: 120, budget: 45000, temp: 55, rad: 35, power: 100, staff: 100 }
+  easy:   { time: 180, budget: 100000, temp: 20, rad: 10, power: 100, staff: 100 },
+  medium: { time: 160, budget: 80000, temp: 35, rad: 20, power: 100, staff: 100 },
+  hard:   { time: 120, budget: 65000, temp: 55, rad: 35, power: 100, staff: 100 }
 };
 
 let timeLeft, budget, temp, rad, power, staff;
@@ -351,7 +351,7 @@ function gameTick() {
   rad += 0.6;
   power -= 0.7;
   staff -= 0.7;
-  budget -= 500;
+  budget -= 100;
 
   updateBars();
 
@@ -479,6 +479,7 @@ setDifficulty();
 </script>
 </body>
 </html>
+
 
 
 
