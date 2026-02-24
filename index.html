@@ -276,26 +276,26 @@ let intervalId = null;
 const eventLocations = [
   // Center Main Control Desk
   { name: "Reactor Core", x: 0.5, y: 0.38, desc: "Reactor temperature rising!", type: "temp", actions: [
-    { label: "Adjust Control Rods", effect: { temp: -20, power: -5, budget: -1000 } },
+    { label: "Adjust Control Rods", effect: { temp: -30, power: -5, budget: -1000 } },
     { label: "Activate Cooling Pumps", effect: { temp: -25, power: -10, budget: -1500 } },
-    { label: "Divert Power to Emergency", effect: { power: -15, temp: -10, budget: -2000 } }
+    { label: "Divert Power to Emergency", effect: { power: -10, temp: -10, budget: -2000 } }
   ]},
   // Top Industrial Section
   { name: "Cooling System", x: 0.7, y: 0.12, desc: "Cooling failure!", type: "power", actions: [
-    { label: "Restart Pumps", effect: { power: +15, temp: -10, budget: -1000 } },
-    { label: "Switch to Backup Generator", effect: { power: +10, budget: -1500 } },
+    { label: "Restart Pumps", effect: { power: +20, temp: -10, budget: -1000 } },
+    { label: "Switch to Backup Generator", effect: { power: +20, budget: -1500 } },
     { label: "Reduce Reactor Output", effect: { temp: -10, power: -10, budget: -1000 } }
   ]},
   // Left Storage/Service Area
   { name: "Maintenance Room", x: 0.13, y: 0.22, desc: "Emergency crew delay!", type: "staff", actions: [
     { label: "Deploy Maintenance Team", effect: { staff: +20, budget: -1000 } },
-    { label: "Unlock Emergency Valves", effect: { staff: +10, power: +5, budget: -1000 } },
+    { label: "Unlock Emergency Valves", effect: { staff: +10, power: +10, budget: -1000 } },
     { label: "Clear System Blockage", effect: { staff: +15, temp: -5, budget: -1000 } }
   ]},
   // Bottom Conference Room
   { name: "Decision Room", x: 0.5, y: 0.85, desc: "Decision phase!", type: "budget", actions: [
     { label: "Partial Shutdown", effect: { temp: -10, power: -10, budget: -1000 } },
-    { label: "Full SCRAM", effect: { temp: -30, power: -30, budget: -1000 } },
+    { label: "Full SCRAM", effect: { temp: -30, power: -10, budget: -1000 } },
     { label: "Evacuate Population", effect: { rad: -10, staff: -10, budget: -1500 } }
   ]},
   // Bottom Hallway With Monitors
@@ -479,6 +479,7 @@ setDifficulty();
 </script>
 </body>
 </html>
+
 
 
 
