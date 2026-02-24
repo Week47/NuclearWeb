@@ -460,16 +460,26 @@ function endGame(msg) {
   running = false;
   clearInterval(intervalId);
   clearEvents();
-  document.getElementById("resultBox").style.display = "block";
-  document.getElementById("resultBox").innerHTML = `
-    <h3>Mission Result</h3>
+
+  const resultBox = document.getElementById("resultBox");
+  resultBox.style.display = "block";
+
+  // Detect win or loss
+  const isWin = timeLeft <= 0;
+
+  // Change colors based on result
+  resultBox.style.borderColor = isWin ? "#16a34a" : "#dc2626";
+  resultBox.style.color = isWin ? "#16a34a" : "#dc2626";
+
+  resultBox.innerHTML = `
+    <h3>${isWin ? "🏆 MISSION SUCCESS" : "⚠️ MISSION FAILED"}</h3>
     <p>${msg}</p>
     <p>
-      🔥 Temperature: ${temp}<br>
-      ☢️ Radiation: ${rad}<br>
-      ⚡ Power: ${power}<br>
-      👥 Staff: ${staff}<br>
-      💰 Budget: $${budget.toLocaleString()}
+      🔥 Temperature: ${temp.toFixed(1)}<br>
+      ☢️ Radiation: ${rad.toFixed(1)}<br>
+      ⚡ Power: ${power.toFixed(1)}<br>
+      👥 Staff: ${staff.toFixed(1)}<br>
+      💰 Budget: $${Math.floor(budget).toLocaleString()}
     </p>
     <button onclick="setDifficulty()">Restart</button>
   `;
@@ -479,6 +489,7 @@ setDifficulty();
 </script>
 </body>
 </html>
+
 
 
 
